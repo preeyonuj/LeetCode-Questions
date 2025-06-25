@@ -1,7 +1,16 @@
 # Write your MySQL query statement below
 SELECT
-    round(avg(n.num), 1) as median
+    AVG(num) as median
 FROM
-    Numbers n
+    (
+        SELECT
+            *,
+            SUM(frequency) OVER (ORDER BY num) as left_cumul,
+            SUM(frequency) OVER (ORDER BY num DESC) as right_cumul,
+            SUM(frequency) OVER () as total
+        FROM
+            Numbers
+    ) n
 WHERE
-    n.frequency >= abs((select sum(frequency) from Numbers where num <= n.num)-(select sum(frequency) from Numbers where num >= n.num))
+    n.left_cumul >= n.total/2 AND
+    n.right_cumul >= n.total/2
